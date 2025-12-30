@@ -1,0 +1,4 @@
+*.o
+.clangd
+
+build/
