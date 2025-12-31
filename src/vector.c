@@ -92,18 +92,21 @@ int vector_append(vector_t *const vec, const void *const elem)
     return 0;
 }
 
-int vector_get_safe(vector_t *const vec, size_t index, void** elem_ptr)
+void* vector_get_detail(vector_t *const vec, size_t index)
 {
-    if (!vec) return -EINVAL;
+    if (!vec) return (void*)-EINVAL;
 
-    if (index >= vec->size) return -EINVAL;
+    if (index >= vec->size) return (void*)-EINVAL;
 
-    *elem_ptr = (char*)vec->data + (vec->datatype_bytes * index);
-    return 0;
+    return (char*)vec->data + (vec->datatype_bytes * index);
 }
 
 void* vector_get(vector_t *const vec, size_t index)
 {
+    if (!vec) return NULL;
+
+    if (index >= vec->size) return NULL;
+
     return (char*)vec->data + (vec->datatype_bytes * index);
 }
 
