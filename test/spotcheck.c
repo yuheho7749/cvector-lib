@@ -8,9 +8,10 @@
 int main(void) {
     vector_t vec;
     int status;
-    int64_t* value;
+    int64_t* value_ptr;
+    int64_t value;
 
-    printf("=== c vector test ===\n");
+    printf("=== c vector spotcheck ===\n");
 
     // Initialize vector for int64_t
     status = vector_init(&vec, sizeof(int64_t), 5, 0);
@@ -34,9 +35,9 @@ int main(void) {
     // Retrieve and print values
     printf("Vector contents:\n");
     for (size_t i = 0; i < vec.size; i++) {
-        value = (int64_t *)vector_get(&vec, i);
-        printf("[%zu] = %ld\n", i, *value);
-        printf("elem %p\n", value);
+        value_ptr = (int64_t *)vector_get(&vec, i);
+        printf("[%zu] = %ld\n", i, *value_ptr);
+        printf("elem %p\n", value_ptr);
     }
 
     // Prepend some integers
@@ -50,12 +51,12 @@ int main(void) {
         printf("Prepended %ld\n", i);
     }
 
-    // Retrieve and print values
+    // Retrieve and print value_ptrs
     printf("Vector contents:\n");
     for (size_t i = 0; i < vec.size; i++) {
-        value = (int64_t *)vector_get(&vec, i);
-        printf("[%zu] = %ld\n", i, *value);
-        printf("elem %p\n", value);
+        value_ptr = (int64_t *)vector_get(&vec, i);
+        printf("[%zu] = %ld\n", i, *value_ptr);
+        printf("elem %p\n", value_ptr);
     }
 
     // Insert some integers
@@ -70,11 +71,12 @@ int main(void) {
 
     printf("Vector contents:\n");
     for (size_t i = 0; i < vec.size; i++) {
-        value = (int64_t *)vector_get(&vec, i);
-        printf("[%zu] = %ld\n", i, *value);
-        printf("elem %p\n", value);
+        value_ptr = (int64_t *)vector_get(&vec, i);
+        printf("[%zu] = %ld\n", i, *value_ptr);
+        printf("elem %p\n", value_ptr);
     }
 
+    // Remove some integers
     for (int64_t i = 4; i < 8; i++) {
         status = vector_remove(&vec, i);
         if (status < 0) {
@@ -86,9 +88,32 @@ int main(void) {
 
     printf("Vector contents:\n");
     for (size_t i = 0; i < vec.size; i++) {
-        value = (int64_t *)vector_get(&vec, i);
-        printf("[%zu] = %ld\n", i, *value);
-        printf("elem %p\n", value);
+        value_ptr = (int64_t *)vector_get(&vec, i);
+        printf("[%zu] = %ld\n", i, *value_ptr);
+        printf("elem %p\n", value_ptr);
+    }
+
+    // Fast remove some integers
+    for (int64_t i = 2; i < 4; i++) {
+        status = vector_fast_remove(&vec, i * 2);
+        if (status < 0) {
+            fprintf(stderr, "vector_fast_remove failed at index %ld: %d\n", i * 2, status);
+            goto exit;
+        }
+        printf("Fast removed at index %ld\n", i * 2);
+    }
+
+    printf("Vector contents:\n");
+    for (size_t i = 0; i < vec.size; i++) {
+        value_ptr = (int64_t *)vector_get(&vec, i);
+        printf("[%zu] = %ld\n", i, *value_ptr);
+        printf("elem %p\n", value_ptr);
+    }
+
+    printf("Vector contents (vector_get_copy):\n");
+    for (size_t i = 0; i < vec.size; i++) {
+        status = vector_get_copy(&vec, i, (void *)&value);
+        printf("[%zu] = %ld\n", i, value);
     }
 
     status = 0;

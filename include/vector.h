@@ -38,8 +38,8 @@ typedef struct {
     void *data;
     size_t size;
     size_t capacity;
-    size_t datatype_bytes; // Low-level type system by design
-    size_t alignment;
+    size_t datatype_bytes;  // Low-level type system by design
+    size_t alignment;       // data alignment in bytes
 } vector_t;
 
 // User handles alloc/free of the vector struct (but not the data field)
@@ -53,7 +53,9 @@ int vector_append(vector_t *vec, const void *elem);
 int vector_prepend(vector_t *vec, const void *elem);
 int vector_insert(vector_t *vec, const void *elem, size_t index);
 int vector_remove(vector_t *vec, size_t index);
+int vector_fast_remove(vector_t *vec, size_t index);
 
 void *vector_get(const vector_t *vec, size_t index);
+int vector_get_copy(const vector_t *vec, size_t index, void *out_elem);
 
 #endif // VECTOR_H

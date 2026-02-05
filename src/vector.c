@@ -235,6 +235,21 @@ void *vector_get(const vector_t *vec, size_t index)
     return (char *)vec->data + (vec->datatype_bytes * index);
 }
 
+int vector_get_copy(const vector_t *vec, size_t index, void *out_elem)
+{
+    void *ptr;
+
+#ifdef HOT_GUARDRAIL
+    if (index < 0 || index >= vec->size) {
+        errno = EINVAL;
+        return -1;
+    }
+#endif
+    ptr = (char *)vec->data + (vec->datatype_bytes * index);
+    memcpy(out_elem, ptr, vec->datatype_bytes);
+    return 0;
+}
+
 int vector_remove(vector_t *vec, size_t index)
 {
     size_t i;
@@ -264,6 +279,41 @@ int vector_remove(vector_t *vec, size_t index)
     }
     vec->size--;
 
+    return 0;
+}
+
+int vector_fast_remove(vector_t *vec, size_t index)
+{
+    char *ptr;
+    char *last_ptr;
+
+#ifdef HOT_GUARDRAIL
+    if (vec->size > vec->capacity) {
+        errno = ENOTRECOVERABLE;
+        return -1;
+    }
+
+    if (index < 0 || index >= vec->size) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (vec->size == 0) {
+        errno = ECANCELED;
+        return -1;
+    }
+#endif
+
+    // Fast path for remove last elem
+    if (index == vec->size - 1) {
+        vec->size--;
+        return 0;
+    }
+
+    ptr = (char *)vec->data + (vec->datatype_bytes * index);
+    last_ptr = (char *)vec->data + (vec->datatype_bytes * (vec->size - 1));
+    memcpy(ptr, last_ptr, vec->datatype_bytes);
+    vec->size--;
     return 0;
 }
 
